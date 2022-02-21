@@ -6,7 +6,7 @@ jobs:
 
   push-job:
     runs-on: ubuntu-latest
-    if: github.event.type == 'push'
+    if: github.event_name == 'push'
     steps:
       - name: Dump GitHub context
         env:
@@ -16,7 +16,7 @@ jobs:
 
   delete-job:
     runs-on: ubuntu-latest
-    if: github.event.type == 'delete'
+    if: github.event_name == 'delete'
     steps:
       - name: Dump GitHub context
         env:
