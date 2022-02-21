@@ -12,7 +12,7 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-      - echo 'sceptre launch stack'
+      - echo "sceptre launch stack"
 
   delete-job:
     runs-on: ubuntu-latest
@@ -22,4 +22,4 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-      - run: echo 'sceptre delete stack'
+      - run: echo "sceptre delete stack"
