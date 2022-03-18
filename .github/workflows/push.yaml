@@ -10,3 +10,15 @@ jobs:
         GITHUB_CONTEXT: ${{ toJson(github) }}
       run: |
         echo "$GITHUB_CONTEXT"
+
+  printEnv:
+    name: Print Environment
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set namespace for tag
+      if: github.ref_type == 'tag'
+      run: echo "NAMESPACE={{ github.ref_name }}" >> $GITHUB_ENV
+
+    - name: Print env
+      run: env | sort
