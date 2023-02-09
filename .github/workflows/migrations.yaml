@@ -1,0 +1,47 @@
+name: Data Migration
+
+on:
+  push:
+    paths:
+      - 'data/migrations/**'
+      - '.github/workflows/migrations.yaml'
+
+defaults:
+  run:
+    shell: bash
+    working-directory: 'data/migrations'
+
+jobs:
+
+  migrate:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v3
+      id: checkout
+
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          metrics:
+            - 'data/migrations/sql/schemas/metrics/**'
+
+    - name: Metrics Changed
+      if: ${{ steps.filter.outputs.metrics }}
+      run: |
+        echo "metrics directory changed? TRUE"
+
+    - name: Metrics Did Not Change
+      if: ${{ ! steps.filter.outputs.metrics }}
+      run: |
+        echo "metrics directory changed? FALSE"
+
+
+
+
+
+
+
