@@ -1,10 +1,10 @@
 name: Data Migration
 
-on:
-  push:
-    paths:
-      - 'data/migrations/**'
-      - '.github/workflows/migrations.yaml'
+on: push
+  # push:
+  #   paths:
+  #     - 'data/migrations/**'
+  #     - '.github/workflows/migrations.yaml'
 
 defaults:
   run:
@@ -17,24 +17,48 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+
+      matrix:
+
+        job-environment:
+          - dev
+          - prod
+
+        include:
+
+          - job-environment: dev
+            environment-secret-name: DEV_ENV
+
+          - job-environment: prod
+            environment-secret-name: PROD_ENV
+
+    environment: ${{ matrix.job-environment }}
+
+
     steps:
 
-    - uses: actions/checkout@v3
-      id: checkout
+      - uses: actions/checkout@v3
+        id: checkout
 
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          metrics:
-            - 'data/migrations/sql/schemas/metrics/**'
+      - run: |
+          echo "${{ secrets[matrix.environment-secret-name] }}" > .env
+          wc -l .env
 
-    - name: Metrics Changed
-      if: ${{ steps.filter.outputs.metrics == 'true' }}
-      run: |
-        echo "metrics directory changed? TRUE"
 
-    - name: Metrics Did Not Change
-      if: ${{ steps.filter.outputs.metrics == 'false' }}
-      run: |
-        echo "metrics directory changed? FALSE"
+    # - uses: dorny/paths-filter@v2
+    #   id: filter
+    #   with:
+    #     filters: |
+    #       metrics:
+    #         - 'data/migrations/sql/schemas/metrics/**'
+
+    # - name: Metrics Changed
+    #   if: ${{ steps.filter.outputs.metrics == 'true' }}
+    #   run: |
+    #     echo "metrics directory changed? TRUE"
+
+    # - name: Metrics Did Not Change
+    #   if: ${{ steps.filter.outputs.metrics == 'false' }}
+    #   run: |
+    #     echo "metrics directory changed? FALSE"
