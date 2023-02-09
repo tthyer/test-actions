@@ -1,7 +1,9 @@
-on: push
+name: Inspect github context and environment
+on:
+  push:
 
 jobs:
-  printJob:    
+  printJob:
     name: Print event
     runs-on: ubuntu-latest
     steps:
