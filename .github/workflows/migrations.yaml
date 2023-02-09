@@ -30,11 +30,11 @@ jobs:
             - 'data/migrations/sql/schemas/metrics/**'
 
     - name: Metrics Changed
-      if: ${{ steps.filter.outputs.metrics }}
+      if: ${{ steps.filter.outputs.metrics == 'true' }}
       run: |
         echo "metrics directory changed? TRUE"
 
     - name: Metrics Did Not Change
-      if: ${{ ! steps.filter.outputs.metrics }}
+      if: ${{ steps.filter.outputs.metrics == 'false' }}
       run: |
         echo "metrics directory changed? FALSE"
