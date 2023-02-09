@@ -1,0 +1,153 @@
+name: Data Migration
+
+on:
+  push:
+    paths:
+      - "data/migrations/**"
+      - ".github/workflows/migrations.yaml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  test-migrate:
+    if: ${{ github.ref != 'refs/heads/main' && github.ref_type != 'tag' }}
+    runs-on: ubuntu-latest
+    container: flyway/flyway:9.3.1 # use redgate/flyway:9.14.1 ?
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # - run: |
+      #     apt-get update
+      #     apt-get install --yes --no-install-recommends postgresql-client
+      #     pg_isready -d postgres -h postgres -p 5432 -U postgres
+
+      - name: Check out repository code branch 1
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Flyway Info 1
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            info -schemas=metrics
+        working-directory: 'data/migrations'
+
+      - name: Flyway Migrate 1
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            migrate -schemas=metrics
+        working-directory: 'data/migrations'
+
+      # - name: Check database state 1
+      #   run: |
+      #     PGPASSWORD=postgres \
+      #     psql -d postgres \
+      #       -h postgres \
+      #       -U postgres \
+      #       -p 5432 \
+      #       -tc "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
+
+      - name: Check out repository code branch 2
+        uses: actions/checkout@v3
+        with:
+          ref: migration
+
+      - name: Flyway Info 2
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            info -schemas=metrics
+        working-directory: 'data/migrations'
+
+      - name: Flyway Migrate 2
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            migrate -schemas=metrics
+        working-directory: 'data/migrations'
+
+      # - name: Check database state 2
+      #   run: |
+      #     PGPASSWORD=postgres \
+      #     psql -d postgres \
+      #       -h postgres \
+      #       -U postgres \
+      #       -p 5432 \
+      #       -tc "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
+
+  migrate:
+    if: ${{ github.ref == 'refs/heads/main' && github.ref_type != 'tag' }}
+    runs-on: ubuntu-latest
+
+    strategy:
+
+      matrix:
+
+        job-environment:
+          - dev
+          - prod
+
+        include:
+
+          - job-environment: dev
+            environment-secret-name: DEV_ENV
+
+          - job-environment: prod
+            environment-secret-name: PROD_ENV
+
+    environment: ${{ matrix.job-environment }}
+
+
+    steps:
+
+      - uses: actions/checkout@v3
+        id: checkout
+
+      - run: |
+          echo "${{ secrets[matrix.environment-secret-name] }}" > .env
+          wc -l .env
+
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            metrics:
+              - 'data/migrations/sql/schemas/metrics/**'
+
+      - name: Metrics Changed
+        if: ${{ steps.filter.outputs.metrics == 'true' }}
+        run: |
+          echo "metrics directory changed? TRUE"
+
+      - name: Metrics Did Not Change
+        if: ${{ steps.filter.outputs.metrics == 'false' }}
+        run: |
+          echo "metrics directory changed? FALSE"
