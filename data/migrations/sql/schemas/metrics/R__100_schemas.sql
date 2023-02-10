@@ -1,0 +1,3 @@
+CREATE SCHEMA IF NOT EXISTS metrics;
+
+CREATE TABLE IF NOT EXISTS metrics (c1 varchar);

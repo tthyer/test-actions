@@ -1,64 +1,77 @@
 name: Data Migration
 
 on: push
-  # push:
-  #   paths:
-  #     - 'data/migrations/**'
-  #     - '.github/workflows/migrations.yaml'
 
 defaults:
   run:
     shell: bash
-    working-directory: 'data/migrations'
 
 jobs:
 
   test-migrate:
 
     runs-on: ubuntu-latest
+    container: flyway/flyway:9.3.1 # use redgate/flyway:9.14.1 ?
     services:
       postgres:
         image: postgres
         env:
-          POSTGRES_DB: db
-          POSTGRES_USER: user
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    steps:
 
+    steps:
+      - run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends postgresql-client
+      - run: |
+          pg_isready -d postgres -h postgres -p 5432 -U postgres
       - name: Check out repository code
         uses: actions/checkout@v3
 
-      # - uses: joshuaavalon/flyway-action@v3.0.0
-      #   with:
-      #     url: jdbc:postgresql://postgres:5432/db
-      #     user: user
-      #     password: postgres
-      #     locations: filesystem:.data/migrations/sql/first
+      - name: Flyway Info
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            info -schemas=metrics
+        working-directory: 'data/migrations'
 
-      - name: Connect to PostgreSQL
-        run: echo foo
-        # Environment variables used by the `client.js` script to create a new PostgreSQL table.
-        env:
-          # The hostname used to communicate with the PostgreSQL service container
-          POSTGRES_HOST: postgres
-          # The default PostgreSQL port
-          POSTGRES_PORT: 5432
+      - name: Flyway Migrate
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            migrate -schemas=metrics
+        working-directory: 'data/migrations'
 
-       # - name: Flyway Info
-       #  run: >-
-       #    docker run --rm
-       #    --volume ${{ github.workspace }}/migrations:/flyway/sql:ro
-       #    "${{ env.DOCKER_IMAGE }}"
-       #    -licenseKey="${{ secrets.FLYWAY_LICENSE_KEY }}"
-       #    -url="${{ secrets.DB_BUILD_URL }}"
-       #    -user="${{ secrets.DB_BUILD_USERNAME }}"
-       #    -password="${{ secrets.DB_BUILD_PASSWORD }}" 
-       #    info -schemas="${{ env.SCHEMAS }}"
+      - name: Flyway Info 2
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            info -schemas=metrics
+        working-directory: 'data/migrations'
+
+      # - name: Flyway Migrate 2
+      #   run: >-
+      #     flyway \
+      #       -url=jdbc:postgresql://postgres:5432/ \
+      #       -user=postgres \
+      #       -password=postgres \
+      #       -locations="filesystem:./sql/schemas/metrics" \
+      #       migrate -schemas=metrics
+      #   working-directory: 'data/migrations'
 
 
   migrate:
