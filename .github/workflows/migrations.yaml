@@ -28,10 +28,14 @@ jobs:
       - run: |
           apt-get update
           apt-get install --yes --no-install-recommends postgresql-client
+
       - run: |
           pg_isready -d postgres -h postgres -p 5432 -U postgres
+
       - name: Check out repository code
         uses: actions/checkout@v3
+        with:
+          ref: main
 
       - name: Flyway Info
         run: >-
@@ -63,16 +67,56 @@ jobs:
             info -schemas=metrics
         working-directory: 'data/migrations'
 
-      # - name: Flyway Migrate 2
-      #   run: >-
-      #     flyway \
-      #       -url=jdbc:postgresql://postgres:5432/ \
-      #       -user=postgres \
-      #       -password=postgres \
-      #       -locations="filesystem:./sql/schemas/metrics" \
-      #       migrate -schemas=metrics
-      #   working-directory: 'data/migrations'
+      - name: Check database state 1
+        run: |
+          PGPASSWORD=postgres \
+          psql -d postgres \
+            -h postgres \
+            -U postgres \
+            -p 5432 \
+            -tc "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
 
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Flyway Info 3
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            info -schemas=metrics
+        working-directory: 'data/migrations'
+
+      - name: Flyway Migrate 2
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            migrate -schemas=metrics
+        working-directory: 'data/migrations'
+
+      - name: Flyway Info 4
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            info -schemas=metrics
+        working-directory: 'data/migrations'
+
+      - name: Check database state 2
+        run: |
+          PGPASSWORD=postgres \
+          psql -d postgres \
+            -h postgres \
+            -U postgres \
+            -p 5432 \
+            -tc "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
 
   migrate:
 
