@@ -1,6 +1,14 @@
 name: Data Migration
 
-on: push
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - "data/migrations/**"
+      - ".github/workflows/data/migrations.yml"
+    tags-ignore:
+      - "**"
 
 defaults:
   run:
@@ -9,8 +17,7 @@ defaults:
 jobs:
 
   test-migrate:
-    if: false #skip
-
+    if: ${{ github.ref != 'refs/heads/main' }}
     runs-on: ubuntu-latest
     container: flyway/flyway:9.3.1 # use redgate/flyway:9.14.1 ?
     services:
@@ -101,45 +108,10 @@ jobs:
             -p 5432 \
             -tc "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
 
-  test-matrix-fail-fast:
-
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 1 # run serially
-      fail-fast: true
-      matrix:
-        job-environment:
-          - dev
-          - prod
-
-        include:
-
-          - job-environment: dev
-            echo-string: foo
-
-          - job-environment: prod
-            echo-string: bar
-
-    environment: ${{ matrix.job-environment }}
-
-    steps:
-
-      - name: Test Matrix Fail Fast Step 1
-        run: |
-          echo "${{ matrix.echo-string }}"
-          exit 1
-
-      - name: Test Matrix Fail Fast Step 2
-        run: |
-          echo "${{ matrix.echo-string }}"
-          exit 0
-
-
   migrate:
-
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     needs: test-migrate
-    if: false #skip
 
     strategy:
 
