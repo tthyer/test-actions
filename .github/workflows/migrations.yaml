@@ -127,7 +127,7 @@ jobs:
       - name: Test Matrix Fail Fast Step 1
         run: |
           echo "${{ matrix.echo-string }}"
-          exit 0
+          exit 1
 
       - name: Test Matrix Fail Fast Step 2
         run: |
