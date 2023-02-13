@@ -32,12 +32,12 @@ jobs:
       - run: |
           pg_isready -d postgres -h postgres -p 5432 -U postgres
 
-      - name: Check out repository code
+      - name: Check out repository code branch 1
         uses: actions/checkout@v3
         with:
           ref: main
 
-      - name: Flyway Info
+      - name: Flyway Info 1
         run: >-
           flyway \
             -url=jdbc:postgresql://postgres:5432/ \
@@ -47,7 +47,7 @@ jobs:
             info -schemas=metrics
         working-directory: 'data/migrations'
 
-      - name: Flyway Migrate
+      - name: Flyway Migrate 1
         run: >-
           flyway \
             -url=jdbc:postgresql://postgres:5432/ \
@@ -55,16 +55,6 @@ jobs:
             -password=postgres \
             -locations="filesystem:./sql/schemas/metrics" \
             migrate -schemas=metrics
-        working-directory: 'data/migrations'
-
-      - name: Flyway Info 2
-        run: >-
-          flyway \
-            -url=jdbc:postgresql://postgres:5432/ \
-            -user=postgres \
-            -password=postgres \
-            -locations="filesystem:./sql/schemas/metrics" \
-            info -schemas=metrics
         working-directory: 'data/migrations'
 
       - name: Check database state 1
@@ -76,10 +66,12 @@ jobs:
             -p 5432 \
             -tc "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
 
-      - name: Check out repository code
+      - name: Check out repository code branch 2
         uses: actions/checkout@v3
+        with:
+          ref: migration
 
-      - name: Flyway Info 3
+      - name: Flyway Info 2
         run: >-
           flyway \
             -url=jdbc:postgresql://postgres:5432/ \
@@ -99,7 +91,19 @@ jobs:
             migrate -schemas=metrics
         working-directory: 'data/migrations'
 
-      - name: Flyway Info 4
+      - name: Check database state 2
+        run: |
+          PGPASSWORD=postgres \
+          psql -d postgres \
+            -h postgres \
+            -U postgres \
+            -p 5432 \
+            -tc "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
+
+      - name: Check out repository code branch 3
+        uses: actions/checkout@v3
+
+      - name: Flyway Info 3
         run: >-
           flyway \
             -url=jdbc:postgresql://postgres:5432/ \
@@ -109,7 +113,17 @@ jobs:
             info -schemas=metrics
         working-directory: 'data/migrations'
 
-      - name: Check database state 2
+      - name: Flyway Migrate 3
+        run: >-
+          flyway \
+            -url=jdbc:postgresql://postgres:5432/ \
+            -user=postgres \
+            -password=postgres \
+            -locations="filesystem:./sql/schemas/metrics" \
+            migrate -schemas=metrics
+        working-directory: 'data/migrations'
+
+      - name: Check database state 3
         run: |
           PGPASSWORD=postgres \
           psql -d postgres \
@@ -117,6 +131,7 @@ jobs:
             -U postgres \
             -p 5432 \
             -tc "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
+
 
   migrate:
 
