@@ -137,7 +137,6 @@ jobs:
 
     runs-on: ubuntu-latest
     needs: test-migrate
-    if: false
 
     strategy:
 
@@ -167,20 +166,19 @@ jobs:
           echo "${{ secrets[matrix.environment-secret-name] }}" > .env
           wc -l .env
 
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            metrics:
+              - 'data/migrations/sql/schemas/metrics/**'
 
-    # - uses: dorny/paths-filter@v2
-    #   id: filter
-    #   with:
-    #     filters: |
-    #       metrics:
-    #         - 'data/migrations/sql/schemas/metrics/**'
+      - name: Metrics Changed
+        if: ${{ steps.filter.outputs.metrics == 'true' }}
+        run: |
+          echo "metrics directory changed? TRUE"
 
-    # - name: Metrics Changed
-    #   if: ${{ steps.filter.outputs.metrics == 'true' }}
-    #   run: |
-    #     echo "metrics directory changed? TRUE"
-
-    # - name: Metrics Did Not Change
-    #   if: ${{ steps.filter.outputs.metrics == 'false' }}
-    #   run: |
-    #     echo "metrics directory changed? FALSE"
+      - name: Metrics Did Not Change
+        if: ${{ steps.filter.outputs.metrics == 'false' }}
+        run: |
+          echo "metrics directory changed? FALSE"
