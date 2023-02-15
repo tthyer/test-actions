@@ -1,0 +1,20 @@
+name: Test always running a step
+
+on: push
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  always:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: First step
+      run: echo "First step"
+    - name: Failing step
+      run: exit 1
+    - name: Always step
+      if: always()
+      run: echo "Always step"
