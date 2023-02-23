@@ -8,11 +8,21 @@ jobs:
     name: Print event
     runs-on: ubuntu-latest
     steps:
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: |
-        echo "$GITHUB_CONTEXT"
+      - name: Dump Contexts
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          ENV_CONTEXT: ${{ toJson(env) }}
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+          INPUTS_CONTEXT: ${{ toJson(inputs) }}
+          JOB_CONTEXT: ${{ toJson(job) }}
+          VARS_CONTEXT: ${{ toJson(vars) }}
+        run: |
+          echo "GITHUB_CONTEXT:\n$GITHUB_CONTEXT\n"
+          echo "ENV_CONTEXT:\n$ENV_CONTEXT\n"
+          echo "RUNNER_CONTEXT:\n$RUNNER_CONTEXT\n"
+          echo "INPUTS_CONTEXT:\n$INPUTS_CONTEXT\n"
+          echo "JOB_CONTEXT:\n$JOB_CONTEXT\n"
+          echo "VARS_CONTEXT:\n$VARS_CONTEXT\n"
 
   printEnv:
     name: Print Environment

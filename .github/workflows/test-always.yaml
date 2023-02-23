@@ -1,6 +1,6 @@
 name: Test always running a step
 
-on: push
+on: workflow_dispatch
 
 defaults:
   run:
