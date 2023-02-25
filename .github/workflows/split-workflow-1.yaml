@@ -1,6 +1,11 @@
 name: Split Workflow 1
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/split-workflow-1.yaml'
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
@@ -24,6 +29,6 @@ jobs:
           echo "${{ vars.TEST_VAR }}"
   call_split-workflow-2:
     needs: [first_job]
-    uses: tthyer/test-actions/.github/workflows/split-workflow-2.yaml@split-workflow
+    uses: tthyer/test-actions/.github/workflows/split-workflow-2.yaml@main
     if: github.event_name == 'push' && github.ref_name == 'main'
     secrets: inherit
