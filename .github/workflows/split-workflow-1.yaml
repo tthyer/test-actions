@@ -1,0 +1,29 @@
+name: Split Workflow 1
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/split-workflow-1.yaml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        default: "dev"
+        type: environment
+
+jobs:
+  first_job:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'dev' }}
+    steps:
+      - name: one step
+        run: |
+          echo "one step"
+          echo "${{ vars.TEST_VAR }}"
+  call_split-workflow-2:
+    needs: [first_job]
+    uses: tthyer/test-actions/.github/workflows/split-workflow-2.yaml@split-workflow
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    secrets: inherit

@@ -1,10 +1,6 @@
 name: Data Migration
 
 on:
-  push:
-    paths:
-      - "data/migrations/**"
-      - ".github/workflows/migrations.yaml"
   workflow_dispatch:
 
 defaults:

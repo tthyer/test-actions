@@ -1,0 +1,21 @@
+name: Split Workflow 2
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        default: "dev"
+        type: environment
+
+jobs:
+  second_job:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'dev' }}
+    steps:
+      - name: another step
+        run: |
+          echo "another step"
+          echo "${{ vars.TEST_VAR }}"
