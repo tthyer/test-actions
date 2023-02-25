@@ -29,6 +29,8 @@ jobs:
           echo "${{ vars.TEST_VAR }}"
   call_split-workflow-2:
     needs: [first_job]
-    uses: tthyer/test-actions/.github/workflows/split-workflow-2.yaml@main
-    if: github.event_name == 'push' && github.ref_name == 'main'
+    #uses: tthyer/test-actions/.github/workflows/split-workflow-2.yaml@main
+    uses: ./.github/workflows/split-workflow-2.yaml
+    # this runs on merges to main, but not when the workflow is manually triggered
+    #if: github.event_name == 'push' && github.ref_name == 'main'
     secrets: inherit
