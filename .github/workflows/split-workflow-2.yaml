@@ -2,6 +2,12 @@ name: Split Workflow 2
 
 on:
   workflow_call:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        default: "dev"
+        type: environment
   workflow_dispatch:
     inputs:
       environment:
