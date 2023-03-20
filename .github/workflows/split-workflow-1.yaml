@@ -1,36 +1,43 @@
 name: Split Workflow 1
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/split-workflow-1.yaml'
-  pull_request:
-    types: [opened, reopened, synchronize]
-    paths:
-      - '.github/workflows/split-workflow-1.yaml'
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment"
-        required: true
-        default: "dev"
-        type: environment
+  schedule:
+    - cron: "45 * * * *"
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - '.github/workflows/split-workflow-1.yaml'
+  # pull_request:
+  #   types: [opened, reopened, synchronize]
+  #   paths:
+  #     - '.github/workflows/split-workflow-1.yaml'
+  # workflow_dispatch:
+  #   inputs:
+  #     environment:
+  #       description: "Environment"
+  #       required: true
+  #       default: "dev"
+  #       type: environment
 
 jobs:
-  first_job:
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'dev' }}
-    steps:
-      - name: one step
-        run: |
-          echo "one step"
-          echo "${{ vars.TEST_VAR }}"
+  # first_job:
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ inputs.environment || 'dev' }}
+  #   steps:
+  #     - name: one step
+  #       run: |
+  #         echo "one step"
+  #         echo "${{ vars.TEST_VAR }}"
   call_split-workflow-2:
     needs: [first_job]
     #uses: tthyer/test-actions/.github/workflows/split-workflow-2.yaml@main
     uses: ./.github/workflows/split-workflow-2.yaml
+    strategy:
+      matrix:
+        environment: [dev, prod]
+    with:
+      environment: ${{ matrix.environment }}
     # this runs on merges to main, but not when the workflow is manually triggered
     #if: github.event_name == 'push' && github.ref_name == 'main'
     secrets: inherit
