@@ -2,7 +2,7 @@ name: Split Workflow 1
 
 on:
   schedule:
-    - cron: "45 * * * *"
+    - cron: "0/5 * * * *"
   # push:
   #   branches:
   #     - main
