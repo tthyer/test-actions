@@ -2,7 +2,7 @@ name: Split Workflow 1
 
 on:
   schedule:
-    - cron: "0/5 * * * *"
+    - cron: "0/2 * * * *"
   # push:
   #   branches:
   #     - main
@@ -35,9 +35,9 @@ jobs:
     uses: ./.github/workflows/split-workflow-2.yaml
     strategy:
       matrix:
-        environment: [dev, prod]
+        job-environment: [dev, prod]
     with:
-      environment: ${{ matrix.environment }}
+      environment: ${{ matrix.job-environment }}
     # this runs on merges to main, but not when the workflow is manually triggered
     #if: github.event_name == 'push' && github.ref_name == 'main'
     secrets: inherit
