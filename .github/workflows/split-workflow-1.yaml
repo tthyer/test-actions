@@ -30,7 +30,7 @@ jobs:
   #         echo "one step"
   #         echo "${{ vars.TEST_VAR }}"
   call_split-workflow-2:
-    needs: [first_job]
+    # needs: [first_job]
     #uses: tthyer/test-actions/.github/workflows/split-workflow-2.yaml@main
     uses: ./.github/workflows/split-workflow-2.yaml
     strategy:
