@@ -1,0 +1,15 @@
+name: Split Workflow 1 Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  call_second_job:
+    if: github.event_name == 'push' # run dbt on push to main
+    uses: ./.github/workflows/split-workflow-2.yaml
+    with:
+      environment: dev
+    secrets: inherit
