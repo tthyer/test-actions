@@ -1,8 +1,8 @@
-name: Split Workflow 1
+name: Split Workflow 1 Matrix
 
 on:
-  schedule:
-    - cron: "0/5 * * * *"
+  # schedule:
+  #   - cron: "0/5 * * * *"
   # push:
   #   branches:
   #     - main
@@ -12,13 +12,13 @@ on:
   #   types: [opened, reopened, synchronize]
   #   paths:
   #     - '.github/workflows/split-workflow-1.yaml'
-  # workflow_dispatch:
-  #   inputs:
-  #     environment:
-  #       description: "Environment"
-  #       required: true
-  #       default: "dev"
-  #       type: environment
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        default: "dev"
+        type: environment
 
 jobs:
   # first_job:
