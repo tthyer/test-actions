@@ -16,6 +16,10 @@ on:
         default: "dev"
         type: environment
 
+concurrency:
+  group: split-${{ inputs.environment}}
+  cancel-in-progress: false
+
 jobs:
   second_job:
     runs-on: ubuntu-latest
